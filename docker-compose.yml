@@ -1,0 +1,48 @@
+
+services:
+  mysql:
+    image: mysql:9.0.1
+    container_name: glpi-db
+    restart: unless-stopped
+    hostname: mysql
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      glpi-network:
+        aliases:
+          - db
+
+  glpi:
+    image: elestio/glpi:10.0.16
+    container_name: glpi-app
+    restart: unless-stopped
+    hostname: glpi
+    ports:
+      - 80:80
+    volumes:
+      - glpi:/var/www/html/glpi
+    environment:
+      - TIMEZONE=Europe/Paris
+    depends_on:
+      - mysql
+    networks:
+      glpi-network:
+        aliases:
+          - app
+
+
+networks:
+  glpi-network:
+    name: glpi-network
+    external: true
+
+volumes:
+  glpi:
+    name: glpi_app_storage
+  db:
+    name: glpi_db_storage
